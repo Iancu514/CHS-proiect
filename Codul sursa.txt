@@ -1,0 +1,50 @@
+#include <LiquidCrystal.h>
+
+// Pin configuration for sensors and LED
+const int PIR_TRIG_PIN = 10;         // Arduino pin connected to PIR sensor's trigger pin
+const int PIR_ECHO_PIN = 9;          // Arduino pin connected to PIR sensor's echo pin
+const int LIGHT_SENSOR_PIN = A0;     // Arduino pin connected to light sensor's pin
+const int LED_PIN = 13;              // Arduino pin connected to LED's pin
+const int LIGHT_THRESHOLD = 500;     // Light threshold value
+
+// Initialize the LCD object
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+  pinMode(PIR_TRIG_PIN, OUTPUT);     // Set PIR sensor trigger pin to output mode
+  pinMode(PIR_ECHO_PIN, INPUT);      // Set PIR sensor echo pin to input mode
+  pinMode(LIGHT_SENSOR_PIN, INPUT);  // Set light sensor pin to input mode
+  pinMode(LED_PIN, OUTPUT);          // Set LED pin to output mode
+
+  // Setează pinul A ca pin de ieșire
+  analogWrite(6,100);
+
+  // Setează numărul de coloane și rânduri ale LCD-ului
+  lcd.begin(16, 2);
+
+}
+
+void loop() {
+  int lightValue = analogRead(LIGHT_SENSOR_PIN);   // Read the input from the light sensor
+  int motionValue = getMotionValue();              // Read the input from the PIR sensor
+
+  if (lightValue >= LIGHT_THRESHOLD || motionValue == LOW) {
+    digitalWrite(LED_PIN, LOW);    // Turn off the LED
+    lcd.clear();                   // Clear the LCD screen
+  } else {
+    digitalWrite(LED_PIN, HIGH);   // Turn on the LED
+    lcd.setCursor(0, 0);           // Set the cursor to the first column, first row
+    lcd.print("DETECTAT");         // Display "DETECTAT"
+  }
+
+  delay(100); // Delay for stability
+}
+
+int getMotionValue() {
+  digitalWrite(PIR_TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PIR_TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(PIR_TRIG_PIN, LOW);
+  return digitalRead(PIR_ECHO_PIN);  // Read the input from the PIR sensor
+}
